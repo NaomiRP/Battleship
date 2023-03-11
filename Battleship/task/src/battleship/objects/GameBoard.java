@@ -13,14 +13,18 @@ public class GameBoard {
 
     private Indicator[][] board = new Indicator[10][10];
 
-    // track the coordinates of each ship, removing each one as it is hit
+    // track the coordinates of each ship, removing each one as it is hit/sunk
     private Map<Ship, List<String>> ships = new HashMap<>();
 
+    private final int playerNum;
+    private final int opponentNum;
 
-    public GameBoard() {
+    public GameBoard(int playerNum, int opponentNum) {
         for (int i = 0; i < 10; i++) {
             board[i] = new Indicator[]{UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN};
         }
+        this.playerNum = playerNum;
+        this.opponentNum = opponentNum;
     }
 
     public boolean allShipsSunk() {
@@ -29,7 +33,7 @@ public class GameBoard {
 
     /** Invite player to take a shot, return true if a ship is sunk */
     public boolean takeShot(PrintStream out, Scanner in) {
-        out.println("Take a shot!");
+        out.println("Player " + opponentNum + ", it's your turn:");
         String input = null;
         int[] coordinate = new int[]{-1, -1};
         while (coordinate[0] == -1 || coordinate[1] == -1) {
@@ -43,13 +47,11 @@ public class GameBoard {
                 board[coordinate[0]][coordinate[1]] = HIT;
                 shipSunk = recordHit(input);
             }
-            print(out, true);
             out.println(shipSunk ? "You sank a ship!" : "You hit a ship!");
             return shipSunk;
         } else {
             if (UNKNOWN.equals(cur))
                 board[coordinate[0]][coordinate[1]] = MISS;
-            print(out, true);
             out.println("You missed!");
             return false;
         }
@@ -69,8 +71,9 @@ public class GameBoard {
     }
 
     public void placeShips(PrintStream out, Scanner in) {
+        out.println("Player " + playerNum + ", place your ships on the game field.");
+        print(out, false, true);
         for (Ship ship : Ship.values()) {
-            print(out, false);
             out.println("Enter the coordinates of the " + ship.getName() + " (" + ship.getLength() + " cells):");
             String input1 = in.next();
             String input2 = in.next();
@@ -84,8 +87,8 @@ public class GameBoard {
                 }
             } while (coordinates == null);
             ships.put(ship, coordinates);
+            print(out, false, true);
         }
-        print(out, false);
     }
 
     /** Convert an input string to row/column indices (a coordinate) */
@@ -152,8 +155,10 @@ public class GameBoard {
     }
 
     /** Print the current state of this board, masked according to the {@param fogOfWar}. */
-    public void print(PrintStream out, boolean fogOfWar) {
-        out.println("\n" + NUM_LABELS);
+    public void print(PrintStream out, boolean fogOfWar, boolean includeSpace) {
+        if (includeSpace)
+            out.println();
+        out.println(NUM_LABELS);
         StringBuilder sb;
         for (int i = 0; i < 10; i++) {
             sb = new StringBuilder().append(ALPHA_LABELS.charAt(i)).append(' ');
@@ -162,6 +167,7 @@ public class GameBoard {
             }
             out.println(sb);
         }
-        out.println();
+        if (includeSpace)
+            out.println();
     }
 }
