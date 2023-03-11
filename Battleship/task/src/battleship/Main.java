@@ -15,8 +15,9 @@ public class Main {
         player1.placeShips(out, in);
 
         out.println("The game starts!");
-        player1.print(out, false);
+        player1.print(out, true);
 
         player1.takeShot(out, in);
+        player1.print(out, false);
     }
 }

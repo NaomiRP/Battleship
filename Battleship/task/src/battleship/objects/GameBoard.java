@@ -34,12 +34,12 @@ public class GameBoard {
         if (hit().contains(cur)) {
             if (SHIP.equals(cur))
                 board[coordinate[0]][coordinate[1]] = HIT;
-            print(out, false);
+            print(out, true);
             out.println("You hit a ship!");
         } else {
             if (UNKNOWN.equals(cur))
                 board[coordinate[0]][coordinate[1]] = MISS;
-            print(out, false);
+            print(out, true);
             out.println("You missed!");
         }
     }
