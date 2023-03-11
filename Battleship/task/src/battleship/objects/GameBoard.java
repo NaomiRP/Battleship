@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 import static battleship.objects.Indicator.*;
+import static java.util.Map.Entry;
 
 public class GameBoard {
 
@@ -22,9 +23,14 @@ public class GameBoard {
         }
     }
 
-    public void takeShot(PrintStream out, Scanner in) {
+    public boolean allShipsSunk() {
+        return ships.size() == 0;
+    }
+
+    /** Invite player to take a shot, return true if a ship is sunk */
+    public boolean takeShot(PrintStream out, Scanner in) {
         out.println("Take a shot!");
-        String input;
+        String input = null;
         int[] coordinate = new int[]{-1, -1};
         while (coordinate[0] == -1 || coordinate[1] == -1) {
             input = in.next();
@@ -32,16 +38,34 @@ public class GameBoard {
         }
         Indicator cur = board[coordinate[0]][coordinate[1]];
         if (hit().contains(cur)) {
-            if (SHIP.equals(cur))
+            boolean shipSunk = false;
+            if (SHIP.equals(cur)) {
                 board[coordinate[0]][coordinate[1]] = HIT;
+                shipSunk = recordHit(input);
+            }
             print(out, true);
-            out.println("You hit a ship!");
+            out.println(shipSunk ? "You sank a ship!" : "You hit a ship!");
+            return shipSunk;
         } else {
             if (UNKNOWN.equals(cur))
                 board[coordinate[0]][coordinate[1]] = MISS;
             print(out, true);
             out.println("You missed!");
+            return false;
         }
+    }
+
+    private boolean recordHit(String shot) {
+        Ship sunk = null;
+        for (Entry<Ship, List<String>> ship: ships.entrySet()) {
+            if (ship.getValue().remove(shot)) {
+                if (ship.getValue().size() == 0)
+                    sunk = ship.getKey();
+            }
+        }
+        if (sunk != null)
+            ships.remove(sunk);
+        return sunk != null;
     }
 
     public void placeShips(PrintStream out, Scanner in) {

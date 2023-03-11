@@ -17,7 +17,10 @@ public class Main {
         out.println("The game starts!");
         player1.print(out, true);
 
-        player1.takeShot(out, in);
-        player1.print(out, false);
+        while (!player1.allShipsSunk()) {
+            player1.takeShot(out, in);
+        }
+
+        out.println("You sank the last ship. You won. Congratulations!");
     }
 }
