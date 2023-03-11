@@ -11,10 +11,10 @@ public class GameBoard {
     private static final String NUM_LABELS = "  1 2 3 4 5 6 7 8 9 10";
     private static final String ALPHA_LABELS = "ABCDEFGHIJ";
 
-    private Indicator[][] board = new Indicator[10][10];
+    private final Indicator[][] board = new Indicator[10][10];
 
     // track the coordinates of each ship, removing each one as it is hit/sunk
-    private Map<Ship, List<String>> ships = new HashMap<>();
+    private final Map<Ship, List<String>> ships = new HashMap<>();
 
     private final int playerNum;
     private final int opponentNum;
@@ -116,7 +116,7 @@ public class GameBoard {
     private List<String> validateCoordinates(String input1, String input2, int length, PrintStream out) {
         int[] coord1 = inputToCoordinate(input1, out);
         int[] coord2 = inputToCoordinate(input2, out);
-        if (coord1[0] == -1 || coord1[1] == -1 || coord2[0] == -1 || coord1[1] == -1 //coordinates are invalid
+        if (coord1[0] == -1 || coord1[1] == -1 || coord2[0] == -1 || coord2[1] == -1 //coordinates are invalid
                || (coord1[0] != coord2[0] && coord1[1] != coord2[1])) //coordinates are not aligned
         {
             out.println("Error! Invalid coordinates. Try again:");

@@ -30,8 +30,4 @@ public enum Indicator {
     static List<Indicator> hit() {
         return List.of(SHIP, HIT);
     }
-
-    static List<Indicator> miss() {
-        return List.of(UNKNOWN, MISS);
-    }
 }

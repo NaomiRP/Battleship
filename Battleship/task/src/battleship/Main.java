@@ -55,7 +55,7 @@ public class Main {
     private static void printBoards(GameBoard curPlayer, GameBoard opponent, PrintStream out) {
         out.println();
         opponent.print(out, true, false);
-        out.println("----------------------");
+        out.println("-".repeat(22));
         curPlayer.print(out, false, false);
         out.println();
     }
