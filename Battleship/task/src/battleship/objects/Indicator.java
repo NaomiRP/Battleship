@@ -1,5 +1,7 @@
 package battleship.objects;
 
+import java.util.List;
+
 public enum Indicator {
 
     UNKNOWN('~'),
@@ -23,5 +25,13 @@ public enum Indicator {
         if (fogOfWar)
             return maskedSymbol;
         return symbol;
+    }
+
+    static List<Indicator> hit() {
+        return List.of(SHIP, HIT);
+    }
+
+    static List<Indicator> miss() {
+        return List.of(UNKNOWN, MISS);
     }
 }

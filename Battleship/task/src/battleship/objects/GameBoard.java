@@ -3,8 +3,7 @@ package battleship.objects;
 import java.io.PrintStream;
 import java.util.*;
 
-import static battleship.objects.Indicator.SHIP;
-import static battleship.objects.Indicator.UNKNOWN;
+import static battleship.objects.Indicator.*;
 
 public class GameBoard {
 
@@ -20,6 +19,28 @@ public class GameBoard {
     public GameBoard() {
         for (int i = 0; i < 10; i++) {
             board[i] = new Indicator[]{UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN};
+        }
+    }
+
+    public void takeShot(PrintStream out, Scanner in) {
+        out.println("Take a shot!");
+        String input;
+        int[] coordinate = new int[]{-1, -1};
+        while (coordinate[0] == -1 || coordinate[1] == -1) {
+            input = in.next();
+            coordinate = inputToCoordinate(input, out);
+        }
+        Indicator cur = board[coordinate[0]][coordinate[1]];
+        if (hit().contains(cur)) {
+            if (SHIP.equals(cur))
+                board[coordinate[0]][coordinate[1]] = HIT;
+            print(out, false);
+            out.println("You hit a ship!");
+        } else {
+            if (UNKNOWN.equals(cur))
+                board[coordinate[0]][coordinate[1]] = MISS;
+            print(out, false);
+            out.println("You missed!");
         }
     }
 
@@ -43,42 +64,49 @@ public class GameBoard {
         print(out, false);
     }
 
+    /** Convert an input string to row/column indices (a coordinate) */
+    private int[] inputToCoordinate(String input, PrintStream out) {
+        int[] coordinate = new int[]{-1, -1};
+        int len1 = input.length();
+        if (len1 < 2 || len1 > 3) {
+            out.println("Error! Invalid coordinates. Try again:");
+            return coordinate;
+        }
+        String row1 = input.substring(0,1);
+        String col1 = input.substring(1);
+        if (!(ALPHA_LABELS.contains(row1) //invalid row
+             && NUM_LABELS.contains(col1))) //invalid column
+        {
+            out.println("Error! Invalid coordinates. Try again:");
+            return coordinate;
+        }
+        coordinate[0] = ALPHA_LABELS.indexOf(row1);
+        coordinate[1] = Integer.parseInt(col1) - 1;
+        return coordinate;
+    }
+
     /** Validates provided coordinates & places the ship if the coordinates are valid. */
     private List<String> validateCoordinates(String input1, String input2, int length, PrintStream out) {
-        int len1 = input1.length();
-        int len2 = input2.length();
-        if (len1 < 2 || len1 > 3 || len2 < 2 || len2 > 3) {
-            out.println("Error! Invalid coordinates. Try again:");
-            return null;
-        }
-        String row1 = input1.substring(0,1);
-        String row2 = input2.substring(0,1);
-        String col1 = input1.substring(1);
-        String col2 = input2.substring(1);
-        if (!(ALPHA_LABELS.contains(row1) && ALPHA_LABELS.contains(row2) //invalid row
-              && NUM_LABELS.contains(col1) && NUM_LABELS.contains(col2)) //invalid column
-            || (!row1.equals(row2) && !col1.equals(col2))) //coordinates are not aligned
+        int[] coord1 = inputToCoordinate(input1, out);
+        int[] coord2 = inputToCoordinate(input2, out);
+        if (coord1[0] == -1 || coord1[1] == -1 || coord2[0] == -1 || coord1[1] == -1 //coordinates are invalid
+               || (coord1[0] != coord2[0] && coord1[1] != coord2[1])) //coordinates are not aligned
         {
             out.println("Error! Invalid coordinates. Try again:");
             return null;
         }
-        int r1index = ALPHA_LABELS.indexOf(row1);
-        int r2index = ALPHA_LABELS.indexOf(row2);
-        int c1int = Integer.parseInt(col1);
-        int c2int = Integer.parseInt(col2);
         // alignment check above ensures one of these is zero
-        int shipLen = r2index - r1index;
-        int shipWid = c2int - c1int;
+        int shipLen = coord2[0] - coord1[0];
+        int shipWid = coord2[1] - coord1[1];
         if (length != (Math.abs(shipLen + shipWid) + 1)) {
             out.println("Error! Wrong ship length. Try again:");
             return null;
         }
         // define adjacent area to check for placed ships
-        int adjRowMin = Math.min(r1index, r2index) - 1;
-        int adjRowMax = Math.max(r1index, r2index) + 1;
-        // column is off by one (0- vs 1-based indexing)
-        int adjColMin = Math.min(c1int, c2int) - 2;
-        int adjColMax = Math.max(c1int, c2int);
+        int adjRowMin = Math.min(coord1[0], coord2[0]) - 1;
+        int adjRowMax = Math.max(coord1[0], coord2[0]) + 1;
+        int adjColMin = Math.min(coord1[1], coord2[1]) - 1;
+        int adjColMax = Math.max(coord1[1], coord2[1]) + 1;
         for (int i = Math.max(adjRowMin, 0); i <= Math.min(adjRowMax, 9); i++) {
             for (int j = Math.max(adjColMin, 0); j <= Math.min(adjColMax, 9); j++) {
                 if (!UNKNOWN.equals(board[i][j])) {
@@ -99,9 +127,9 @@ public class GameBoard {
         return coordinates;
     }
 
-
+    /** Print the current state of this board, masked according to the {@param fogOfWar}. */
     public void print(PrintStream out, boolean fogOfWar) {
-        out.println(NUM_LABELS);
+        out.println("\n" + NUM_LABELS);
         StringBuilder sb;
         for (int i = 0; i < 10; i++) {
             sb = new StringBuilder().append(ALPHA_LABELS.charAt(i)).append(' ');

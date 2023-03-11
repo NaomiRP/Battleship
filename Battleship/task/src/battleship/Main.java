@@ -13,5 +13,10 @@ public class Main {
 
         GameBoard player1 = new GameBoard();
         player1.placeShips(out, in);
+
+        out.println("The game starts!");
+        player1.print(out, false);
+
+        player1.takeShot(out, in);
     }
 }
